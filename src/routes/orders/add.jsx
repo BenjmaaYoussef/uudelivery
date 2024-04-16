@@ -191,6 +191,67 @@ export default function AddOrder() {
           </CardContent>
         </Card>
       </div>
+      <div className="flex items-center gap-2 ml-auto md:hidden">
+        <Dialog open={open} onOpenChange={setOpen}>
+          <DialogTrigger asChild>
+            <Button size="sm">Save Order</Button>
+          </DialogTrigger>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Are you absolutely sure?</DialogTitle>
+              <DialogDescription>
+                This action will create an order on our servers.
+              </DialogDescription>
+              <DialogFooter>
+                <DialogClose asChild>
+                  <Button size="sm" variant="outline">
+                    Cancel
+                  </Button>
+                </DialogClose>
+                <Button
+                  size="sm"
+                  disabled={isUpdating}
+                  onClick={async () => {
+                    if (
+                      destination == "" ||
+                      customerEmail == "" ||
+                      temperatureMax == "" ||
+                      temperatureMin == "" ||
+                      tiltAngleMax == ""
+                    ) {
+                      setOpen(false);
+                      toast({
+                        variant: "destructive",
+                        title: "Uh oh! Something went wrong.",
+                        description: "Make sure you filled all fields.",
+                      });
+                    } else {
+                      try {
+                        const newOrder = {
+                          destination,
+                          customerEmail,
+                          temperatureMax,
+                          temperatureMin,
+                          tiltAngleMax,
+                        };
+                        const result = await addOrder({
+                          requestBody: newOrder,
+                        });
+                        setOpen(false);
+                        navigate("/orders");
+                      } catch (e) {
+                        console.log(e);
+                      }
+                    }
+                  }}
+                >
+                  Proceed
+                </Button>
+              </DialogFooter>
+            </DialogHeader>
+          </DialogContent>
+        </Dialog>
+      </div>
     </main>
   );
 }

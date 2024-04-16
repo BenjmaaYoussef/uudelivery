@@ -71,8 +71,8 @@ export default function Header() {
               <Package2 className="h-6 w-6" />
               <span>UUDelivery</span>
             </a>
-            <a
-              href="#"
+            <Link
+              to="/"
               className={
                 location.pathname == "/"
                   ? "hover:text-muted-foreground text-foreground transition-colors "
@@ -80,9 +80,9 @@ export default function Header() {
               }
             >
               Trackers
-            </a>
-            <a
-              href="#"
+            </Link>
+            <Link
+              to="/orders"
               className={
                 location.pathname.includes("/orders")
                   ? "hover:text-muted-foreground text-foreground transition-colors "
@@ -90,7 +90,7 @@ export default function Header() {
               }
             >
               Orders
-            </a>
+            </Link>
           </nav>
         </SheetContent>
       </Sheet>
