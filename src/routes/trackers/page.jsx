@@ -286,11 +286,11 @@ export default function Trackers() {
                       {capitalizeFirstLetter(tracker.status)}
                     </Badge>
                   </TableCell>
-                  <TableCell className="text-right">
+                  <TableCell className="text-right flex-col gap-1 md:flex-row">
                     {tracker.status == "active" ? (
                       <Button
                         size="sm"
-                        className="bg-red-800 hover:bg-red-950 w-1/2"
+                        className="bg-red-800 hover:bg-red-950  w-full md:w-1/2"
                         disabled={isUpdatingStatus}
                         onClick={async () => {
                           try {
@@ -316,7 +316,7 @@ export default function Trackers() {
                     ) : (
                       <Button
                         size="sm"
-                        className="bg-green-800 hover:bg-green-950 w-1/2"
+                        className="bg-green-800 hover:bg-green-950 md:w-1/2 w-full"
                         disabled={isUpdatingStatus}
                         onClick={async () => {
                           try {
@@ -343,7 +343,7 @@ export default function Trackers() {
 
                     <Button
                       size="sm"
-                      className="ml-2"
+                      className="ml-2 w-full md:w-auto"
                       disabled={isDeleting}
                       onClick={async () => {
                         try {
@@ -357,9 +357,15 @@ export default function Trackers() {
                       }}
                     >
                       {isDeleting ? (
-                        <Loader className="h-4 w-4 animate-spin" />
+                        <>
+                          <Loader className="h-4 w-4 animate-spin" />
+                          <span className=" md:hidden">Delete</span>
+                        </>
                       ) : (
-                        <Trash className="h-4 w-4" />
+                        <>
+                          <Trash className="h-4 w-4" />
+                          <span className=" md:hidden">Delete</span>
+                        </>
                       )}
                     </Button>
                   </TableCell>
