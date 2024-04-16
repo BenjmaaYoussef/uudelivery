@@ -290,7 +290,7 @@ export default function Trackers() {
                     {tracker.status == "active" ? (
                       <Button
                         size="sm"
-                        className="bg-red-800 hover:bg-red-950  w-full md:w-1/2"
+                        className="bg-red-800 hover:bg-red-950 mb-1 md:mb-0 w-full md:w-1/2"
                         disabled={isUpdatingStatus}
                         onClick={async () => {
                           try {
@@ -316,7 +316,7 @@ export default function Trackers() {
                     ) : (
                       <Button
                         size="sm"
-                        className="bg-green-800 hover:bg-green-950 md:w-1/2 w-full"
+                        className="bg-green-800 hover:bg-green-950 mb-1 md:mb-0 md:w-1/2 w-full"
                         disabled={isUpdatingStatus}
                         onClick={async () => {
                           try {
@@ -343,7 +343,7 @@ export default function Trackers() {
 
                     <Button
                       size="sm"
-                      className="ml-2 w-full md:w-auto"
+                      className="md:ml-2 w-full md:w-auto"
                       disabled={isDeleting}
                       onClick={async () => {
                         try {
