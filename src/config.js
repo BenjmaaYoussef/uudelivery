@@ -1,2 +1,1 @@
-export const BASE_URL =
-  "http://ec2-51-20-254-44.eu-north-1.compute.amazonaws.com";
+export const BASE_URL = "https://51.20.254.44.nip.io/";
