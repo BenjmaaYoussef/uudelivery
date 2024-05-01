@@ -21,9 +21,17 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import { getUser, removeUserSession } from "@/utils";
 export default function Header() {
   const location = useLocation();
+  const user = getUser();
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    removeUserSession();
+    navigate(`/login`, { replace: true });
+  };
   return (
     <header className="sticky top-0 flex h-16 items-center gap-4 border-b bg-background px-4 md:px-6">
       <nav className="hidden flex-col gap-6 text-lg font-medium md:flex md:flex-row md:items-center md:gap-5 md:text-sm lg:gap-6">
@@ -100,13 +108,18 @@ export default function Header() {
           <DropdownMenuTrigger asChild>
             <Button variant="secondary" className="rounded-full">
               <CircleUser className="h-5 w-5" />
-              <span className="ml-2">Manager Name</span>
+              <span className="ml-2">
+                {user.name + " " + user.surname} |{" "}
+                {user.roles.map(
+                  (role) => role + (user.roles.length > 1 ? ", " : "")
+                )}
+              </span>
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
-            <DropdownMenuLabel>Manager Info</DropdownMenuLabel>
+            <DropdownMenuLabel>{user.email}</DropdownMenuLabel>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>
+            <DropdownMenuItem onClick={handleLogout}>
               <LogOut className="h-4 w-4 mr-2" /> Logout
             </DropdownMenuItem>
           </DropdownMenuContent>

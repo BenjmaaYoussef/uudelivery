@@ -1,5 +1,5 @@
 import React from "react";
-import { ArrowUpRight, Plus } from "lucide-react";
+import { ArrowUpRight, Loader, Plus, Trash } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -22,11 +22,30 @@ import { Link } from "react-router-dom";
 import useSWR from "swr";
 import { BASE_URL } from "@/config";
 import { Skeleton } from "@/components/ui/skeleton";
+import useSWRMutation from "swr/mutation";
+import { getUser } from "@/utils";
+
+async function deleteReq(url, { arg }) {
+  console.log(arg.requestBody);
+  return fetch(BASE_URL + "/api/order/" + arg.requestBody, {
+    headers: {
+      Accept: "application/json",
+      "Content-Type": "application/json",
+    },
+    method: "DELETE",
+  });
+}
 
 export default function Orders() {
   const fetcher = (url) => fetch(url).then((res) => res.json());
-
+  const user = getUser();
+  console.log(user);
   const { data, error, isLoading } = useSWR(BASE_URL + "/api/order", fetcher);
+  const {
+    data: deletedTracked,
+    trigger: deleteTrackerPost,
+    isMutating: isDeleting,
+  } = useSWRMutation(BASE_URL + "/api/order", deleteReq);
   if (error) return "An error has occurred.";
   if (isLoading)
     return (
@@ -47,6 +66,7 @@ export default function Orders() {
                 <TableRow>
                   <TableHead>Order ID</TableHead>
                   <TableHead>Destination</TableHead>
+                  <TableHead className="sr-only">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -133,19 +153,92 @@ export default function Orders() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {data.map((order) => (
-                <TableRow key={order._id}>
-                  <TableCell>
-                    <Link to={"/orders/" + order._id}>
-                      <div className="font-medium">{order._id}</div>
-                      <div className="hidden text-sm text-muted-foreground md:inline">
-                        {order.customerEmail}
-                      </div>
-                    </Link>
-                  </TableCell>
-                  <TableCell>{order.destination}</TableCell>
-                </TableRow>
-              ))}
+              {data.map((order) => {
+                if (user.roles.includes("Manager")) {
+                  return (
+                    <TableRow key={order._id}>
+                      <TableCell>
+                        <Link to={"/orders/" + order._id}>
+                          <div className="font-medium">{order._id}</div>
+                          <div className="hidden text-sm text-muted-foreground md:inline">
+                            {order.customerEmail}
+                          </div>
+                        </Link>
+                      </TableCell>
+                      <TableCell>{order.destination}</TableCell>
+                      <TableCell className="text-right flex-col gap-1 md:flex-row">
+                        <Button
+                          size="sm"
+                          className="md:ml-2 w-full md:w-auto"
+                          disabled={isDeleting}
+                          onClick={async () => {
+                            try {
+                              const result = await deleteTrackerPost({
+                                requestBody: order._id,
+                              });
+                              setOpen(false);
+                            } catch (e) {
+                              console.log(e);
+                            }
+                          }}
+                        >
+                          {isDeleting ? (
+                            <>
+                              <Loader className="h-4 w-4 animate-spin" />
+                            </>
+                          ) : (
+                            <>
+                              <Trash className="h-4 w-4" />
+                            </>
+                          )}
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  );
+                } else {
+                  if (order.start == null || order.end == null)
+                    return (
+                      <TableRow key={order._id}>
+                        <TableCell>
+                          <Link to={"/orders/" + order._id}>
+                            <div className="font-medium">{order._id}</div>
+                            <div className="hidden text-sm text-muted-foreground md:inline">
+                              {order.customerEmail}
+                            </div>
+                          </Link>
+                        </TableCell>
+                        <TableCell>{order.destination}</TableCell>
+                        <TableCell className="text-right flex-col gap-1 md:flex-row">
+                          <Button
+                            size="sm"
+                            className="md:ml-2 w-full md:w-auto"
+                            disabled={isDeleting}
+                            onClick={async () => {
+                              try {
+                                const result = await deleteTrackerPost({
+                                  requestBody: order._id,
+                                });
+                                setOpen(false);
+                              } catch (e) {
+                                console.log(e);
+                              }
+                            }}
+                          >
+                            {isDeleting ? (
+                              <>
+                                <Loader className="h-4 w-4 animate-spin" />
+                              </>
+                            ) : (
+                              <>
+                                <Trash className="h-4 w-4" />
+                              </>
+                            )}
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    );
+                }
+              })}
             </TableBody>
           </Table>
         </CardContent>

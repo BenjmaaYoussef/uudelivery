@@ -10,11 +10,15 @@ import Orders from "./routes/orders/page.jsx";
 import AddOrder from "./routes/orders/add.jsx";
 import Page from "./routes/trackers/page.jsx";
 import SingleOrder from "./routes/orders/[id]/page.jsx";
+import { Login } from "./routes/login/page.jsx";
+import { SignUp } from "./routes/signup/page.jsx";
+import { PrivateRoutes } from "./PrivateRoutes.jsx";
+import { PublicRoute } from "./PublicRoute.jsx";
 
 const router = createBrowserRouter([
   {
     path: "/",
-    element: <Root />,
+    element: <PrivateRoutes />,
     // errorElement: <ErrorPage />,
     children: [
       {
@@ -32,6 +36,26 @@ const router = createBrowserRouter([
       {
         path: "/orders/:id",
         element: <SingleOrder />,
+      },
+    ],
+  },
+  {
+    path: "/login",
+    element: <PublicRoute />,
+    children: [
+      {
+        path: "/login",
+        element: <Login />,
+      },
+    ],
+  },
+  {
+    path: "/signup",
+    element: <PublicRoute />,
+    children: [
+      {
+        path: "/signup",
+        element: <SignUp />,
       },
     ],
   },
