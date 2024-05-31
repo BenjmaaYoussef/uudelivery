@@ -30,16 +30,6 @@ import {
 import { Link } from "react-router-dom";
 import useSWR, { useSWRConfig } from "swr";
 import { BASE_URL } from "@/config";
-import {
-  Dialog,
-  DialogClose,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
 import useSWRMutation from "swr/mutation";
 import { useToast } from "@/components/ui/use-toast";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -220,51 +210,6 @@ export default function Trackers() {
               All trackers available in our database
             </CardDescription>
           </div>
-          <Dialog open={open} onOpenChange={setOpen}>
-            <DialogTrigger asChild>
-              <Button size="sm" className="ml-auto gap-1">
-                Add a tracker
-                <Plus className="h-4 w-4" />
-              </Button>
-            </DialogTrigger>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>Are you absolutely sure?</DialogTitle>
-                <DialogDescription>
-                  This action will create an tracker on our servers.
-                </DialogDescription>
-                <DialogFooter>
-                  <DialogClose asChild>
-                    <Button size="sm" variant="outline">
-                      Cancel
-                    </Button>
-                  </DialogClose>
-                  <Button
-                    size="sm"
-                    disabled={isUpdating}
-                    onClick={async () => {
-                      try {
-                        const result = await addTrackerPost();
-                        setOpen(false);
-                        toast({
-                          title: (
-                            <div className="flex">
-                              <Check className="h-6 w-6 mr-2" />
-                              {result._id} tracker is created successfully
-                            </div>
-                          ),
-                        });
-                      } catch (e) {
-                        console.log(e);
-                      }
-                    }}
-                  >
-                    Proceed
-                  </Button>
-                </DialogFooter>
-              </DialogHeader>
-            </DialogContent>
-          </Dialog>
         </CardHeader>
         <CardContent>
           <Table>
@@ -276,101 +221,105 @@ export default function Trackers() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {data.map((tracker) => (
-                <TableRow key={tracker._id}>
-                  <TableCell>
-                    <div className="font-medium">{tracker._id}</div>
-                  </TableCell>
-                  <TableCell>
-                    <Badge variant={"outline"}>
-                      {capitalizeFirstLetter(tracker.status)}
-                    </Badge>
-                  </TableCell>
-                  <TableCell className="text-right flex-col gap-1 md:flex-row">
-                    {tracker.status == "active" ? (
-                      <Button
-                        size="sm"
-                        className="bg-red-800 hover:bg-red-950 mb-1 md:mb-0 w-full md:w-1/2"
-                        disabled={isUpdatingStatus}
-                        onClick={async () => {
-                          try {
-                            const result = await updateTracker({
-                              requestBody: {
-                                id: tracker._id,
-                                status: "inactive",
-                              },
-                            });
-                            setOpen(false);
-                          } catch (e) {
-                            console.log(e);
-                          }
-                        }}
-                      >
-                        {isUpdatingStatus ? (
-                          <Loader className="h-4 w-4 animate-spin" />
+              {!data.message
+                ? data.map((tracker) => (
+                    <TableRow key={tracker._id}>
+                      <TableCell>
+                        <div className="font-medium">
+                          {tracker.trackerId || tracker._id}
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant={"outline"}>
+                          {capitalizeFirstLetter(tracker.status)}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="text-right flex-col gap-1 md:flex-row">
+                        {tracker.status == "active" ? (
+                          <Button
+                            size="sm"
+                            className="bg-red-800 hover:bg-red-950 mb-1 md:mb-0 w-full md:w-1/2"
+                            disabled={isUpdatingStatus}
+                            onClick={async () => {
+                              try {
+                                const result = await updateTracker({
+                                  requestBody: {
+                                    id: tracker.trackerId,
+                                    status: "inactive",
+                                  },
+                                });
+                                setOpen(false);
+                              } catch (e) {
+                                console.log(e);
+                              }
+                            }}
+                          >
+                            {isUpdatingStatus ? (
+                              <Loader className="h-4 w-4 animate-spin" />
+                            ) : (
+                              <X className="h-4 w-4 mr-2" />
+                            )}
+                            Deactivate
+                          </Button>
                         ) : (
-                          <X className="h-4 w-4 mr-2" />
+                          <Button
+                            size="sm"
+                            className="bg-green-800 hover:bg-green-950 mb-1 md:mb-0 md:w-1/2 w-full"
+                            disabled={isUpdatingStatus}
+                            onClick={async () => {
+                              try {
+                                const result = await updateTracker({
+                                  requestBody: {
+                                    id: tracker.trackerId,
+                                    status: "active",
+                                  },
+                                });
+                                setOpen(false);
+                              } catch (e) {
+                                console.log(e);
+                              }
+                            }}
+                          >
+                            {isUpdatingStatus ? (
+                              <Loader className="h-4 w-4 animate-spin" />
+                            ) : (
+                              <Check className="h-4 w-4 mr-2" />
+                            )}
+                            Activate
+                          </Button>
                         )}
-                        Deactivate
-                      </Button>
-                    ) : (
-                      <Button
-                        size="sm"
-                        className="bg-green-800 hover:bg-green-950 mb-1 md:mb-0 md:w-1/2 w-full"
-                        disabled={isUpdatingStatus}
-                        onClick={async () => {
-                          try {
-                            const result = await updateTracker({
-                              requestBody: {
-                                id: tracker._id,
-                                status: "active",
-                              },
-                            });
-                            setOpen(false);
-                          } catch (e) {
-                            console.log(e);
-                          }
-                        }}
-                      >
-                        {isUpdatingStatus ? (
-                          <Loader className="h-4 w-4 animate-spin" />
-                        ) : (
-                          <Check className="h-4 w-4 mr-2" />
-                        )}
-                        Activate
-                      </Button>
-                    )}
 
-                    <Button
-                      size="sm"
-                      className="md:ml-2 w-full md:w-auto"
-                      disabled={isDeleting}
-                      onClick={async () => {
-                        try {
-                          const result = await deleteTrackerPost({
-                            requestBody: tracker._id,
-                          });
-                          setOpen(false);
-                        } catch (e) {
-                          console.log(e);
-                        }
-                      }}
-                    >
-                      {isDeleting ? (
-                        <>
-                          <Loader className="h-4 w-4 animate-spin" />
-                          <span className=" md:hidden">Delete</span>
-                        </>
-                      ) : (
-                        <>
-                          <Trash className="h-4 w-4" />
-                          <span className=" md:hidden">Delete</span>
-                        </>
-                      )}
-                    </Button>
-                  </TableCell>
-                </TableRow>
-              ))}
+                        <Button
+                          size="sm"
+                          className="md:ml-2 w-full md:w-auto"
+                          disabled={isDeleting}
+                          onClick={async () => {
+                            try {
+                              const result = await deleteTrackerPost({
+                                requestBody: tracker.trackerId,
+                              });
+                              setOpen(false);
+                            } catch (e) {
+                              console.log(e);
+                            }
+                          }}
+                        >
+                          {isDeleting ? (
+                            <>
+                              <Loader className="h-4 w-4 animate-spin" />
+                              <span className=" md:hidden">Delete</span>
+                            </>
+                          ) : (
+                            <>
+                              <Trash className="h-4 w-4" />
+                              <span className=" md:hidden">Delete</span>
+                            </>
+                          )}
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                : data.message}
             </TableBody>
           </Table>
         </CardContent>
