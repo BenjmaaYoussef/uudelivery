@@ -69,6 +69,7 @@ export default function Track() {
     error: orderError,
     isLoading: orderLoading,
   } = useSWR(BASE_URL + "/api/order/" + id, fetcher);
+  console.log(orderError)
   if (orderError)
     return (
       <section className="bg-white dark:bg-gray-900">
