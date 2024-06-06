@@ -62,14 +62,8 @@ const router = createBrowserRouter([
   },
 
   {
-    path: "/track/",
-    element: <PublicRoute />,
-    children: [
-      {
-        path: "/track/:id",
+    path: "/track/:id",
         element: <Track />,
-      },
-    ],
   },
 ]);
 
