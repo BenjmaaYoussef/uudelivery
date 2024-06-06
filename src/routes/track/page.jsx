@@ -227,9 +227,6 @@ export default function Track() {
                     trackerData.data[0].data.longitude,
                   ]}
                 >
-                  <Popup>
-                    A pretty CSS3 popup. <br /> Easily customizable.
-                  </Popup>
                 </Marker>
               </MapContainer>
             </CardContent>
