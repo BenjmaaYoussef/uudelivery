@@ -33,6 +33,7 @@ import { BASE_URL } from "@/config";
 import useSWRMutation from "swr/mutation";
 import { useToast } from "@/components/ui/use-toast";
 import { Skeleton } from "@/components/ui/skeleton";
+import { getUser } from "@/utils";
 
 function capitalizeFirstLetter(string) {
   return string.charAt(0).toUpperCase() + string.slice(1);
@@ -77,6 +78,7 @@ export default function Trackers() {
   const [open, setOpen] = useState(false);
   const { mutate } = useSWRConfig();
   const { toast } = useToast();
+  const user = getUser();
 
   const { data, error, isLoading } = useSWR(BASE_URL + "/api/tracker", fetcher);
   const {
@@ -234,89 +236,92 @@ export default function Trackers() {
                           {capitalizeFirstLetter(tracker.status)}
                         </Badge>
                       </TableCell>
-                      <TableCell className="text-right flex-col gap-1 md:flex-row">
-                        {tracker.status == "active" ? (
-                          <Button
-                            size="sm"
-                            className="bg-red-800 hover:bg-red-950 mb-1 md:mb-0 w-full md:w-1/2"
-                            disabled={isUpdatingStatus}
-                            onClick={async () => {
-                              try {
-                                const result = await updateTracker({
-                                  requestBody: {
-                                    id: tracker.trackerId,
-                                    status: "inactive",
-                                  },
-                                });
-                                setOpen(false);
-                              } catch (e) {
-                                console.log(e);
-                              }
-                            }}
-                          >
-                            {isUpdatingStatus ? (
-                              <Loader className="h-4 w-4 animate-spin" />
-                            ) : (
-                              <X className="h-4 w-4 mr-2" />
-                            )}
-                            Deactivate
-                          </Button>
-                        ) : (
-                          <Button
-                            size="sm"
-                            className="bg-green-800 hover:bg-green-950 mb-1 md:mb-0 md:w-1/2 w-full"
-                            disabled={isUpdatingStatus}
-                            onClick={async () => {
-                              try {
-                                const result = await updateTracker({
-                                  requestBody: {
-                                    id: tracker.trackerId,
-                                    status: "active",
-                                  },
-                                });
-                                setOpen(false);
-                              } catch (e) {
-                                console.log(e);
-                              }
-                            }}
-                          >
-                            {isUpdatingStatus ? (
-                              <Loader className="h-4 w-4 animate-spin" />
-                            ) : (
-                              <Check className="h-4 w-4 mr-2" />
-                            )}
-                            Activate
-                          </Button>
-                        )}
+                      {user.roles.includes("Manager") ? (
+            <TableCell className="text-right flex-col gap-1 md:flex-row">
+            {tracker.status == "active" ? (
+              <Button
+                size="sm"
+                className="bg-red-800 hover:bg-red-950 mb-1 md:mb-0 w-full md:w-1/2"
+                disabled={isUpdatingStatus}
+                onClick={async () => {
+                  try {
+                    const result = await updateTracker({
+                      requestBody: {
+                        id: tracker.trackerId,
+                        status: "inactive",
+                      },
+                    });
+                    setOpen(false);
+                  } catch (e) {
+                    console.log(e);
+                  }
+                }}
+              >
+                {isUpdatingStatus ? (
+                  <Loader className="h-4 w-4 animate-spin" />
+                ) : (
+                  <X className="h-4 w-4 mr-2" />
+                )}
+                Deactivate
+              </Button>
+            ) : (
+              <Button
+                size="sm"
+                className="bg-green-800 hover:bg-green-950 mb-1 md:mb-0 md:w-1/2 w-full"
+                disabled={isUpdatingStatus}
+                onClick={async () => {
+                  try {
+                    const result = await updateTracker({
+                      requestBody: {
+                        id: tracker.trackerId,
+                        status: "active",
+                      },
+                    });
+                    setOpen(false);
+                  } catch (e) {
+                    console.log(e);
+                  }
+                }}
+              >
+                {isUpdatingStatus ? (
+                  <Loader className="h-4 w-4 animate-spin" />
+                ) : (
+                  <Check className="h-4 w-4 mr-2" />
+                )}
+                Activate
+              </Button>
+            )}
 
-                        <Button
-                          size="sm"
-                          className="md:ml-2 w-full md:w-auto"
-                          disabled={isDeleting}
-                          onClick={async () => {
-                            try {
-                              const result = await deleteTrackerPost({
-                                requestBody: tracker.trackerId,
-                              });
-                              setOpen(false);
-                            } catch (e) {
-                              console.log(e);
-                            }
-                          }}
-                        >
-                          {isDeleting ? (
-                            <>
-                              <Loader className="h-4 w-4 animate-spin" />
-                              <span className=" md:hidden">Delete</span>
-                            </>
-                          ) : (
-                            <>
-                              <Trash className="h-4 w-4" />
-                              <span className=" md:hidden">Delete</span>
-                            </>
-                          )}
-                        </Button>
-                      </TableCell>
+            <Button
+              size="sm"
+              className="md:ml-2 w-full md:w-auto"
+              disabled={isDeleting}
+              onClick={async () => {
+                try {
+                  const result = await deleteTrackerPost({
+                    requestBody: tracker.trackerId,
+                  });
+                  setOpen(false);
+                } catch (e) {
+                  console.log(e);
+                }
+              }}
+            >
+              {isDeleting ? (
+                <>
+                  <Loader className="h-4 w-4 animate-spin" />
+                  <span className=" md:hidden">Delete</span>
+                </>
+              ) : (
+                <>
+                  <Trash className="h-4 w-4" />
+                  <span className=" md:hidden">Delete</span>
+                </>
+              )}
+            </Button>
+          </TableCell>
+          ) : <TableCell></TableCell>}
+                      
                     </TableRow>
                   ))
                 : data.message}

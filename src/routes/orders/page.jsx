@@ -198,7 +198,7 @@ export default function Orders() {
                   return (
                     <TableRow key={order._id}>
                       <TableCell>
-                        <Link to={"/orders/" + order._id}>
+                        <Link to={"/track/" + order._id}>
                           <div className="font-medium">{order._id}</div>
                           <div className="hidden text-sm text-muted-foreground md:inline">
                             {order.customerEmail}
@@ -253,7 +253,7 @@ export default function Orders() {
                     return (
                       <TableRow key={order._id}>
                         <TableCell>
-                          <Link to={"/orders/" + order._id}>
+                          <Link to={"/track/" + order._id}>
                             <div className="font-medium">{order._id}</div>
                             <div className="hidden text-sm text-muted-foreground md:inline">
                               {order.customerEmail}
