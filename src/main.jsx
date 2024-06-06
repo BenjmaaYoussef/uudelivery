@@ -57,8 +57,8 @@ const router = createBrowserRouter([
   },
 
   {
-        path: "/track/:id",
-        element: <Track />,
+    path: "/track/:id",
+    element: <Track />,
   },
 ]);
 

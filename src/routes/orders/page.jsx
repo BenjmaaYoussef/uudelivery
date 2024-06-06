@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { ArrowUpRight, Check, Loader, Plus, Trash } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
@@ -25,6 +25,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import useSWRMutation from "swr/mutation";
 import { getUser } from "@/utils";
 import { useToast } from "@/components/ui/use-toast";
+import { Checkbox } from "@/components/ui/checkbox";
 
 async function deleteReq(url, { arg }) {
   console.log(arg.requestBody);
@@ -40,6 +41,7 @@ async function deleteReq(url, { arg }) {
 export default function Orders() {
   const fetcher = (url) => fetch(url).then((res) => res.json());
   const user = getUser();
+  const [selectedOrders, setSelectedOrders] = useState([]);
   const { toast } = useToast();
   console.log(user);
   async function updateReq(url, { arg }) {
@@ -100,6 +102,7 @@ export default function Orders() {
             <Table>
               <TableHeader>
                 <TableRow>
+                  <TableHead></TableHead>
                   <TableHead>Order ID</TableHead>
                   <TableHead>Destination</TableHead>
                   <TableHead className="sr-only">Actions</TableHead>
@@ -173,12 +176,48 @@ export default function Orders() {
               Recent orders added into our database.
             </CardDescription>
           </div>
-          {user.roles.includes("Manager") && (
+          {user.roles.includes("Manager") ? (
             <Button asChild size="sm" className="ml-auto gap-1">
               <Link to="/orders/new">
                 Add new order
                 <Plus className="h-4 w-4" />
               </Link>
+            </Button>
+          ) : (
+            <Button
+              disabled={selectedOrders.length == 0}
+              size="sm"
+              className="ml-auto gap-1"
+              onClick={async () => {
+                try {
+                  const result = await updateOrder({
+                    requestBody: {
+                      id: selectedOrders,
+                      start: true,
+                    },
+                  });
+                  toast({
+                    description: "Order status updated successfully",
+                  });
+                  setSelectedOrders([]);
+                } catch (e) {
+                  toast({
+                    description: e.message,
+                  });
+                  console.log(e);
+                }
+              }}
+            >
+              {isUpdating && selectedOrders.length != 0 ? (
+                <>
+                  <Loader className="h-4 w-4 animate-spin" />
+                </>
+              ) : (
+                <>
+                  <Check className="h-4 w-4" />
+                </>
+              )}
+              Start Selected Orders
             </Button>
           )}
         </CardHeader>
@@ -186,6 +225,7 @@ export default function Orders() {
           <Table>
             <TableHeader>
               <TableRow>
+                <TableHead></TableHead>
                 <TableHead>Order ID</TableHead>
                 <TableHead>Destination</TableHead>
                 <TableHead>Start Date</TableHead>
@@ -253,6 +293,25 @@ export default function Orders() {
                     return (
                       <TableRow key={order._id}>
                         <TableCell>
+                          <Checkbox
+                            disabled={order.start != null}
+                            onCheckedChange={(checked) => {
+                              if (checked) {
+                                setSelectedOrders([
+                                  ...selectedOrders,
+                                  order._id,
+                                ]);
+                              } else {
+                                setSelectedOrders(
+                                  selectedOrders.filter((e) => e !== order._id)
+                                );
+                              }
+                              console.log("///");
+                              console.log(selectedOrders);
+                            }}
+                          />
+                        </TableCell>
+                        <TableCell>
                           <Link to={"/track/" + order._id}>
                             <div className="font-medium">{order._id}</div>
                             <div className="hidden text-sm text-muted-foreground md:inline">
@@ -279,7 +338,10 @@ export default function Orders() {
                                 ? "md:ml-2 w-full md:w-auto bg-red-800"
                                 : "md:ml-2 w-full md:w-auto bg-green-800"
                             }
-                            disabled={isUpdating}
+                            disabled={
+                              isUpdating ||
+                              (!order.start && selectedOrders.length != 0)
+                            }
                             onClick={async () => {
                               try {
                                 const result = await updateOrder(

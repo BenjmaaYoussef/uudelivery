@@ -26,6 +26,7 @@ import { BASE_URL } from "@/config";
 import { useParams } from "react-router-dom";
 import GaugeComponent from "react-gauge-component";
 import { Loader } from "lucide-react";
+import { getUser } from "@/utils";
 
 export default function Track() {
   const [trackerData, setTrackerData] = useState({});
@@ -59,7 +60,6 @@ export default function Track() {
             setTrackerData({ ...trackerData, data: iot["data"] });
           }
         });
-        console.log(orderData);
         return orderData;
       }
     });
@@ -68,8 +68,10 @@ export default function Track() {
     data: orderData,
     error: orderError,
     isLoading: orderLoading,
-  } = useSWR(BASE_URL + "/api/order/" + id, fetcher);
-  console.log(orderError)
+  } = useSWR(BASE_URL + "/api/order/" + id, fetcher, {
+    refreshInterval: 10000,
+  });
+  console.log(orderError);
   if (orderError)
     return (
       <section className="bg-white dark:bg-gray-900">
@@ -112,126 +114,141 @@ export default function Track() {
                 <h2 className="font-bold">Destination:</h2>
                 <div>{orderData.destination}</div>
               </div>
-              <div className="flex justify-center mt-7">
-                <GaugeComponent
-                  type="semicircle"
-                  arc={{
-                    width: 0.2,
-                    padding: 0.005,
-                    cornerRadius: 1,
-                    // gradient: true,
-                    subArcs: [
-                      {
-                        limit: 15,
-                        color: "#EA4228",
-                        showTick: true,
-                        tooltip: {
-                          text: "Too low temperature!",
+              {(orderData.start || orderData.end) && (
+                <div className="flex justify-center mt-7">
+                  <GaugeComponent
+                    type="semicircle"
+                    arc={{
+                      width: 0.2,
+                      padding: 0.005,
+                      cornerRadius: 1,
+                      // gradient: true,
+                      subArcs: [
+                        {
+                          limit: 15,
+                          color: "#EA4228",
+                          showTick: true,
+                          tooltip: {
+                            text: "Too low temperature!",
+                          },
+                          onClick: () =>
+                            console.log("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"),
+                          onMouseMove: () =>
+                            console.log("BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB"),
+                          onMouseLeave: () =>
+                            console.log("CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC"),
                         },
-                        onClick: () =>
-                          console.log("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"),
-                        onMouseMove: () =>
-                          console.log("BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB"),
-                        onMouseLeave: () =>
-                          console.log("CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC"),
-                      },
-                      {
-                        limit: 17,
-                        color: "#F5CD19",
-                        showTick: true,
-                        tooltip: {
-                          text: "Low temperature!",
+                        {
+                          limit: 17,
+                          color: "#F5CD19",
+                          showTick: true,
+                          tooltip: {
+                            text: "Low temperature!",
+                          },
                         },
-                      },
-                      {
-                        limit: 28,
-                        color: "#5BE12C",
-                        showTick: true,
-                        tooltip: {
-                          text: "OK temperature!",
+                        {
+                          limit: 28,
+                          color: "#5BE12C",
+                          showTick: true,
+                          tooltip: {
+                            text: "OK temperature!",
+                          },
                         },
-                      },
-                      {
-                        limit: 30,
-                        color: "#F5CD19",
-                        showTick: true,
-                        tooltip: {
-                          text: "High temperature!",
+                        {
+                          limit: 30,
+                          color: "#F5CD19",
+                          showTick: true,
+                          tooltip: {
+                            text: "High temperature!",
+                          },
                         },
-                      },
-                      {
-                        color: "#EA4228",
-                        tooltip: {
-                          text: "Too high temperature!",
+                        {
+                          color: "#EA4228",
+                          tooltip: {
+                            text: "Too high temperature!",
+                          },
                         },
+                      ],
+                    }}
+                    pointer={{
+                      color: "#345243",
+                      length: 0.8,
+                      width: 15,
+                      // elastic: true,
+                    }}
+                    labels={{
+                      valueLabel: {
+                        formatTextValue: !trackerData.data
+                          ? () => "Loading..."
+                          : (value) => value + "ºC",
                       },
-                    ],
-                  }}
-                  pointer={{
-                    color: "#345243",
-                    length: 0.8,
-                    width: 15,
-                    // elastic: true,
-                  }}
-                  labels={{
-                    valueLabel: {
-                      formatTextValue: !trackerData.data
-                        ? () => "Loading..."
-                        : (value) => value + "ºC",
-                    },
-                    tickLabels: {
-                      type: "outer",
-                      valueConfig: {
-                        formatTextValue: (value) => value + "ºC",
-                        fontSize: 10,
+                      tickLabels: {
+                        type: "outer",
+                        valueConfig: {
+                          formatTextValue: (value) => value + "ºC",
+                          fontSize: 10,
+                        },
+                        ticks: [{ value: 13 }, { value: 22.5 }, { value: 32 }],
                       },
-                      ticks: [{ value: 13 }, { value: 22.5 }, { value: 32 }],
-                    },
-                  }}
-                  value={!trackerData.data ? 0 : trackerData.data[1].data}
-                  minValue={10}
-                  maxValue={35}
-                />
-              </div>
+                    }}
+                    value={!trackerData.data ? 0 : trackerData.data[1].data}
+                    minValue={10}
+                    maxValue={35}
+                  />
+                </div>
+              )}
             </div>
           </CardContent>
         </Card>
-        <Card className="w-full lg:w-1/2">
-          <CardHeader>
-            <CardTitle className="text-center">Location</CardTitle>
-          </CardHeader>
-          {!trackerData.data ? (
-            <CardContent>
-              <div className="text-center flex justify-center flex-row">
-                <Loader className="animate-spin" /> Loading map
-              </div>
-            </CardContent>
-          ) : (
-            <CardContent>
-              <MapContainer
-                center={[
-                  trackerData.data[0].data.latitude,
-                  trackerData.data[0].data.longitude,
-                ]}
-                zoom={13}
-                scrollWheelZoom={true}
-                className="w-full h-[200px]"
-              >
-                <TileLayer
-                  attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-                  url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                />
-                <Marker
-                  position={[
-                    trackerData.data[0].data.latitude,
-                    trackerData.data[0].data.longitude,
-                  ]}
+        {(orderData.start || orderData.end) && (
+          <Card className="w-full lg:w-1/2">
+            <CardHeader>
+              <CardTitle className="text-center">Location</CardTitle>
+            </CardHeader>
+            {!trackerData.data ? (
+              <CardContent>
+                <div className="text-center flex justify-center flex-row">
+                  <Loader className="animate-spin" /> Loading map
+                </div>
+              </CardContent>
+            ) : (
+              <CardContent>
+                <MapContainer
+                  center={
+                    trackerData.data[0].data.latitude == 0
+                      ? [50.109, 14.5128]
+                      : [
+                          trackerData.data[0].data.latitude,
+                          trackerData.data[0].data.longitude,
+                        ]
+                  }
+                  zoom={13}
+                  scrollWheelZoom={true}
+                  className="w-full h-[200px]"
                 >
-                </Marker>
-              </MapContainer>
-            </CardContent>
-          )}
-        </Card>
+                  <TileLayer
+                    attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                    url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                  />
+                  <Marker
+                    position={
+                      trackerData.data[0].data.latitude == 0
+                        ? [50.109, 14.5128]
+                        : [
+                            trackerData.data[0].data.latitude,
+                            trackerData.data[0].data.longitude,
+                          ]
+                    }
+                  >
+                    <Popup>
+                      A pretty CSS3 popup. <br /> Easily customizable.
+                    </Popup>
+                  </Marker>
+                </MapContainer>
+              </CardContent>
+            )}
+          </Card>
+        )}
       </div>
     </div>
   );
