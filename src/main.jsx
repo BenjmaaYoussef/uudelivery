@@ -14,6 +14,7 @@ import { Login } from "./routes/login/page.jsx";
 import { SignUp } from "./routes/signup/page.jsx";
 import { PrivateRoutes } from "./PrivateRoutes.jsx";
 import { PublicRoute } from "./PublicRoute.jsx";
+import Track from "./routes/track/page.jsx";
 
 const router = createBrowserRouter([
   {
@@ -56,6 +57,17 @@ const router = createBrowserRouter([
       {
         path: "/signup",
         element: <SignUp />,
+      },
+    ],
+  },
+
+  {
+    path: "/track/",
+    element: <PublicRoute />,
+    children: [
+      {
+        path: "/track/:id",
+        element: <Track />,
       },
     ],
   },

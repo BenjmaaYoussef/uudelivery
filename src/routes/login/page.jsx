@@ -18,21 +18,26 @@ export function Login() {
   const handleLogin = () => {
     setError(null);
     setLoading(true);
-    axios
-      .post(BASE_URL + "/api/auth/login", {
-        email: username.value,
-        password: password.value,
-      })
-      .then((response) => {
-        setLoading(false);
-        setUserSession(response.data.accessToken, response.data.user);
-        console.log("to dashboard");
-        navigate(`/`, { replace: true });
-      })
-      .catch((error) => {
-        setLoading(false);
-        setError(error);
-      });
+    if (username.value == "" || password.value == "") {
+      setError("Invalid credentials, please try again");
+      setLoading(false);
+    } else {
+      axios
+        .post(BASE_URL + "/api/auth/login", {
+          email: username.value,
+          password: password.value,
+        })
+        .then((response) => {
+          setLoading(false);
+          setUserSession(response.data.accessToken, response.data.user);
+          console.log("to dashboard");
+          navigate(`/`, { replace: true });
+        })
+        .catch((error) => {
+          setLoading(false);
+          setError("Invalid credentials, please try again");
+        });
+    }
   };
 
   return (
