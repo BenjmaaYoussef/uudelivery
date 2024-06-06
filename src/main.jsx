@@ -9,7 +9,6 @@ import Root from "./routes/root";
 import Orders from "./routes/orders/page.jsx";
 import AddOrder from "./routes/orders/add.jsx";
 import Page from "./routes/trackers/page.jsx";
-import SingleOrder from "./routes/orders/[id]/page.jsx";
 import { Login } from "./routes/login/page.jsx";
 import { SignUp } from "./routes/signup/page.jsx";
 import { PrivateRoutes } from "./PrivateRoutes.jsx";
@@ -33,10 +32,6 @@ const router = createBrowserRouter([
       {
         path: "/orders/new",
         element: <AddOrder />,
-      },
-      {
-        path: "/orders/:id",
-        element: <SingleOrder />,
       },
     ],
   },
@@ -62,8 +57,14 @@ const router = createBrowserRouter([
   },
 
   {
-    path: "/track/:id",
+    path: "/track/",
+    element: <PublicRoute />,
+    children: [
+      {
+        path: "/track/:id",
         element: <Track />,
+      },
+    ],
   },
 ]);
 
